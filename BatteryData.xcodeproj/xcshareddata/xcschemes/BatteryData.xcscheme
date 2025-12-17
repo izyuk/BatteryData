@@ -21,6 +21,20 @@
                ReferencedContainer = "container:BateryData.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "1E1AD4F02E73250C00F2C143"
+               BuildableName = "BatteryData.app"
+               BlueprintName = "BatteryData"
+               ReferencedContainer = "container:BatteryData.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

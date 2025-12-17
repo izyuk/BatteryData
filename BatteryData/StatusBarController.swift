@@ -26,7 +26,7 @@ final class StatusBarController {
         popover = NSPopover()
         popover.behavior = .transient
         popover.contentSize = NSSize(width: 320, height: 520)
-        popover.contentViewController = NSHostingController(rootView: BatteryMenuView(vm: vm))
+        popover.contentViewController = NSHostingController(rootView: BatteryMenuView(macVm: vm))
 
         if let button = statusItem.button {
             button.image = NSImage(systemSymbolName: "bolt.circle", accessibilityDescription: nil)
@@ -42,9 +42,13 @@ final class StatusBarController {
 
         // оновлення title при зміні prefs (compact mode, watts, etc.)
         defaultsObserver = NotificationCenter.default.addObserver(
-            forName: UserDefaults.didChangeNotification, object: nil, queue: .main
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
         ) { [weak self] _ in
-            self?.updateTitle()
+            Task { @MainActor in
+                self?.updateTitle()
+            }
         }
 
         updateTitle()
