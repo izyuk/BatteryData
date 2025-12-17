@@ -1,0 +1,76 @@
+# BatteryData ⚡️
+
+A lightweight macOS menu bar app that shows detailed battery information, power usage, and history charts.
+
+---
+
+## ✨ Features
+
+- Menu bar app with a clean and minimal UI
+- Battery percentage, charging state, and AC status
+- Real-time power usage (W)
+- Time to empty / time to full estimation
+- Battery health, cycle count, temperature
+- Power adapter type and wattage
+- Battery usage history charts
+- Optional expanded battery info in the status bar
+- Launch at login support
+- macOS notifications:
+  - Low battery alerts (20%, 10%, 5%)
+  - Fully charged notification
+  - Power spike detection
+
+---
+
+## 🧭 Status Bar Modes
+
+BatteryData supports a simple status bar behavior:
+
+- **Expanded battery info — OFF (default)**
+  Shows only the battery icon in the menu bar.
+
+- **Expanded battery info — ON**
+  Shows battery percentage, ETA, and power usage directly in the menu bar.
+
+This can be toggled in **Settings → Status Bar**.
+
+---
+
+## 📊 Charts
+
+The app displays battery history charts:
+- Battery percentage over time
+- Power usage (W) over time
+
+Charts are shown inside a popover window and update automatically.
+
+---
+
+## ⚙️ Settings
+
+- Refresh interval
+- Estimation window for ETA calculation
+- History chart duration
+- Expanded battery info in status bar
+- Launch at login
+- Notification preferences (via macOS System Settings)
+
+---
+
+## 🖥 Requirements
+
+- macOS 13.0 or newer
+- Apple Silicon or Intel Mac
+
+---
+
+## 🛠 Tech Stack
+
+- Swift
+- SwiftUI
+- Combine
+- AppKit (`NSStatusItem`, `NSPopover`)
+- Charts framework
+- IOKit (battery & power data)
+
+---
