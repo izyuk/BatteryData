@@ -107,8 +107,8 @@ final class BatteryViewModel: ObservableObject {
         let pctValue = info.percentage
         let pct = pctValue.map { "\($0)%" } ?? "—"
         
-        // ✅ Якщо батарея повністю заряджена — показуємо тільки %
-        if pctValue == 100 {
+        // ✅ 100% + AC → only %
+        if pctValue == 100, info.onACPower == true {
             return " \(pct)"
         }
         
