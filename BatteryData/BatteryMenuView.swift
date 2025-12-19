@@ -9,13 +9,13 @@ import SwiftUI
 
 struct BatteryMenuView: View {
     @ObservedObject var macVm: BatteryViewModel
-    @StateObject private var headphonesVm = HeadphonesBatteryViewModel()
+    @StateObject private var devicesVm = DevicesBatteryViewModel()
 
     @State private var selectedTab: Tab = .mac
 
     enum Tab: String, CaseIterable, Identifiable {
         case mac = "Mac"
-        case headphones = "Headphones"
+        case devices = "Devices"
         var id: String { rawValue }
     }
 
@@ -23,14 +23,14 @@ struct BatteryMenuView: View {
         VStack(alignment: .leading, spacing: 10) {
 
             // Якщо немає підключених навушників — UI 1-в-1 як було
-            if headphonesVm.connectedHeadphones.isEmpty {
+            if devicesVm.connectedHeadphones.isEmpty {
                 MacBatteryMenuContentView(vm: macVm)
             } else {
 
                 // Tabs (segmented) у меню
                 Picker("", selection: $selectedTab) {
                     Text("Mac").tag(Tab.mac)
-                    Text("Headphones").tag(Tab.headphones)
+                    Text("Devices").tag(Tab.devices)
                 }
                 .pickerStyle(.segmented)
 
@@ -39,8 +39,8 @@ struct BatteryMenuView: View {
                     case .mac:
                         MacBatteryMenuContentView(vm: macVm)
 
-                    case .headphones:
-                        HeadphonesMenuContentView(vm: headphonesVm)
+                    case .devices:
+                        DevicesMenuContentView(vm: devicesVm)
                     }
                 }
             }
@@ -48,10 +48,10 @@ struct BatteryMenuView: View {
         .frame(width: 300)
         .padding(10)
         .onAppear {
-            headphonesVm.start()
+            devicesVm.start()
         }
         .onDisappear {
-            headphonesVm.stop()
+            devicesVm.stop()
         }
     }
 }

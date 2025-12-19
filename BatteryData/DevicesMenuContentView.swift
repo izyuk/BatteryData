@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct HeadphonesMenuContentView: View {
-    @ObservedObject var vm: HeadphonesBatteryViewModel
+struct DevicesMenuContentView: View {
+    @ObservedObject var vm: DevicesBatteryViewModel
 
     private func percentText(_ p: Int?) -> String {
         guard let p else { return "—" }
@@ -20,7 +20,7 @@ struct HeadphonesMenuContentView: View {
         VStack(alignment: .leading, spacing: 8) {
 
             HStack {
-                Text("Headphones").font(.headline)
+                Text("Devices").font(.headline)
                 Spacer()
                 Button("Refresh") { vm.refresh() }
             }
@@ -31,7 +31,7 @@ struct HeadphonesMenuContentView: View {
             }
 
             if vm.connectedHeadphones.isEmpty {
-                Label("No headphones connected", systemImage: "airpods")
+                Label("No devices connected", systemImage: "bolt.batteryblock")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(vm.connectedHeadphones) { item in
