@@ -46,16 +46,6 @@ enum SystemProfilerBluetoothReader {
 
                 p.waitUntilExit()
 
-                print("system_profiler exit:", p.terminationStatus)
-
-                if !errData.isEmpty {
-                    print("system_profiler stderr:\n", String(decoding: errData, as: UTF8.self))
-                }
-
-                // 👇 ОЦЕ КЛЮЧОВИЙ ЛОГ
-                let preview = String(decoding: outData.prefix(600), as: UTF8.self)
-                print("SP JSON PREVIEW:\n", preview)
-
                 guard p.terminationStatus == 0, !outData.isEmpty else {
                     cont.resume(returning: nil)
                     return

@@ -35,15 +35,32 @@ final class BatteryViewModel: ObservableObject {
     // Samples for trend ETA
     private var samplesForEta: [(t: Date, p: Int)] = []
     
-    init() {
+    private let readBatteryInfo: () -> BatteryInfo?
+    private let notify: (String, String) -> Void
+    private let now: () -> Date
+    
+    init(
+        autoStart: Bool = true,
+        readBatteryInfo: @escaping () -> BatteryInfo? = { BatteryReader.read() },
+        notify: @escaping (String, String) -> Void = { title, body in
+            Notifier.notify(title: title, body: body)
+        },
+        now: @escaping () -> Date = Date.init
+    ) {
+        self.readBatteryInfo = readBatteryInfo
+        self.notify = notify
+        self.now = now
+        
         defaultsObserver = NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification, object: nil, queue: .main
         ) { [weak self] _ in
             self?.restartTimerIfNeeded()
             self?.objectWillChange.send()
         }
-        refresh()
-        startAutoRefresh()
+        if autoStart {
+            refresh()
+            startAutoRefresh()
+        }
     }
     
     deinit {
@@ -133,15 +150,15 @@ final class BatteryViewModel: ObservableObject {
     
     func refresh() {
         usedFallbackEstimate = false
-        let newInfo = BatteryReader.read() ?? .empty
+        let newInfo = readBatteryInfo() ?? .empty
         info = newInfo
         
         appendHistory(info: newInfo)
         
         if let p = newInfo.percentage {
-            let now = Date()
-            samplesForEta.append((now, p))
-            let cutoff = now.addingTimeInterval(-estimationWindowSec)
+            let currentTime = now()
+            samplesForEta.append((currentTime, p))
+            let cutoff = currentTime.addingTimeInterval(-estimationWindowSec)
             samplesForEta.removeAll { $0.t < cutoff }
         }
         
@@ -195,21 +212,21 @@ final class BatteryViewModel: ObservableObject {
     }
     
     private func appendHistory(info: BatteryInfo) {
-        let now = Date()
-        history.append(HistorySample(t: now, percent: info.percentage, watts: info.watts))
-        let cutoff = now.addingTimeInterval(-chartDurationSec)
+        let currentTime = now()
+        history.append(HistorySample(t: currentTime, percent: info.percentage, watts: info.watts))
+        let cutoff = currentTime.addingTimeInterval(-chartDurationSec)
         history.removeAll { $0.t < cutoff }
     }
     
     // MARK: - Notifications
     
     private func handleNotifications(old newInfo: BatteryInfo) {
-        let now = Date()
+        let currentTime = now()
         
         // Low battery 20/10/5 — тільки на батареї
         if newInfo.onACPower == false, let p = newInfo.percentage {
             for th in [20, 10, 5] where p <= th && !lowNotified.contains(th) {
-                Notifier.notify(title: "Low Battery", body: "Battery level is \(p)%")
+                notify("Low Battery", "Battery level is \(p)%")
                 lowNotified.insert(th)
             }
         } else {
@@ -218,9 +235,9 @@ final class BatteryViewModel: ObservableObject {
         
         // Fully charged: 100% і на AC ≥ 10 хв
         if newInfo.onACPower == true, (newInfo.percentage ?? 0) >= 100 {
-            if fullChargeStart == nil { fullChargeStart = now }
-            if !fullNotified, let start = fullChargeStart, now.timeIntervalSince(start) >= 600 {
-                Notifier.notify(title: "Fully Charged", body: "Battery reached 100% and stayed on AC for 10+ minutes.")
+            if fullChargeStart == nil { fullChargeStart = currentTime }
+            if !fullNotified, let start = fullChargeStart, currentTime.timeIntervalSince(start) >= 600 {
+                notify("Fully Charged", "Battery reached 100% and stayed on AC for 10+ minutes.")
                 fullNotified = true
             }
         } else {
@@ -230,14 +247,14 @@ final class BatteryViewModel: ObservableObject {
         
         // Стрибки потужності: |ΔW| > 10 Вт за < 10 c, cooldown 5 хв
         if let wNow = newInfo.watts {
-            let tenSecAgo = now.addingTimeInterval(-10)
+            let tenSecAgo = currentTime.addingTimeInterval(-10)
             if let wPast = history.last(where: { $0.t <= tenSecAgo })?.watts,
                abs(wNow - (wPast ?? 0)) >= 10 {
-                if lastSpikeAt == nil || now.timeIntervalSince(lastSpikeAt!) > 300 {
+                if lastSpikeAt == nil || currentTime.timeIntervalSince(lastSpikeAt!) > 300 {
                     let sign = wNow >= 0 ? "+" : "−"
-                    Notifier.notify(title: "Power Spike",
-                                    body: "Power changed by \(sign)\(String(format: "%.1f", abs(wNow - (wPast ?? 0))))W")
-                    lastSpikeAt = now
+                    notify("Power Spike",
+                           "Power changed by \(sign)\(String(format: "%.1f", abs(wNow - (wPast ?? 0))))W")
+                    lastSpikeAt = currentTime
                 }
             }
         }

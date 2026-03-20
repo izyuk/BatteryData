@@ -16,6 +16,8 @@ final class DevicesBatteryViewModel: NSObject, ObservableObject {
     @Published private(set) var connectedDevices: [DeviceBatteryInfo] = []
     @Published private(set) var errorText: String?
     
+    var connectedHeadphones: [DeviceBatteryInfo] { connectedDevices }
+    
     // BLE Battery Service + Battery Level Characteristic
     nonisolated static let batteryService = CBUUID(string: "180F")
     nonisolated static let batteryLevelChar = CBUUID(string: "2A19")
@@ -161,10 +163,7 @@ final class DevicesBatteryViewModel: NSObject, ObservableObject {
     
     private func enrichWithSystemProfilerIfNeeded() async {
         guard let json = await SystemProfilerBluetoothReader.fetchBluetoothJSON() else { return }
-        
-        // 👇 debug helper (safe to keep or remove)
-        debugDumpConnectedDevices(from: json)
-        
+
         for idx in connectedDevices.indices {
             let hp = connectedDevices[idx]
             if hp.batteryPercent != nil { continue }
@@ -178,9 +177,7 @@ final class DevicesBatteryViewModel: NSObject, ObservableObject {
                 address: addr,
                 deviceName: hp.name
             )
-            
-            print("HP:", hp.name, "id:", hp.id, "addr:", addr, "snap:", snap as Any)
-            
+
             guard let snap else { continue }
             
             let newPercent: Int? = {
@@ -196,31 +193,6 @@ final class DevicesBatteryViewModel: NSObject, ObservableObject {
             
             connectedDevices[idx].batteryPercent = newPercent
             connectedDevices[idx].lastUpdated = Date()
-        }
-    }
-    
-    private func debugDumpConnectedDevices(from jsonData: Data) {
-        guard
-            let obj = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
-            let arr = obj["SPBluetoothDataType"] as? [[String: Any]],
-            let first = arr.first,
-            let connected = first["device_connected"] as? [[String: Any]]
-        else {
-            print("DEBUG: JSON shape unexpected")
-            return
-        }
-        
-        for item in connected {
-            guard let (name, propsAny) = item.first,
-                  let props = propsAny as? [String: Any]
-            else { continue }
-            
-            let addr = props["device_address"] as? String ?? "-"
-            let left = props["device_batteryLevelLeft"] as? String ?? "-"
-            let right = props["device_batteryLevelRight"] as? String ?? "-"
-            let cs = props["device_batteryLevelCase"] as? String ?? "-"
-            
-            print("DEBUG DEV:", name, "addr:", addr, "L:", left, "R:", right, "C:", cs)
         }
     }
     
@@ -241,8 +213,7 @@ final class DevicesBatteryViewModel: NSObject, ObservableObject {
         if n.contains("buds") || n.contains("earbuds") { return true }
         if n.contains("ear") && n.contains("pod") { return true }
         
-        // heuristic: audio-like names often short and not “keyboard/mouse”
-        return true
+        return false
     }
     
     private func getAllIOBluetoothAudioDevices() -> [IOBluetoothDevice] {
