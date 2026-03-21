@@ -6,7 +6,7 @@
 //
 
 enum PrefKeys {
-    static let refreshIntervalSec   = "pref_refreshIntervalSec"   // Double (1...30), default 5
+    static let refreshIntervalSec   = "pref_refreshIntervalSec"   // Double (1...30), default 1
     static let estimationWindowMin  = "pref_estimationWindowMin"  // Double (1...10), default 3
     static let showWattsInStatusBar = "pref_showWattsInStatusBar" // Bool, default true
     static let compactLabel         = "pref_compactLabel"         // Bool, default false

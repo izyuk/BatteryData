@@ -35,7 +35,14 @@ final class BatteryViewModel: ObservableObject {
     private var compactLabel: Bool { UserDefaults.standard.bool(forKey: PrefKeys.compactLabel) }
     
     // AC deficit: adapter doesn't cover load → battery discharges
-    private var adapterDeficit: Bool { info.onACPower == true && (info.watts ?? 0) < 0 }
+    private var exactAdapterDeficit: Bool { info.onACPower == true && (info.watts ?? 0) < 0 }
+    private var estimatedAdapterDeficit: Bool {
+        guard info.onACPower == true, exactAdapterDeficit == false else { return false }
+        guard info.isCharging != true else { return false }
+        guard let timeToEmptyMin = info.timeToEmptyMin, timeToEmptyMin > 0 else { return false }
+        return true
+    }
+    private var adapterDeficit: Bool { exactAdapterDeficit || estimatedAdapterDeficit }
     
     // Samples for trend ETA
     private var samplesForEta: [(t: Date, p: Int)] = []
@@ -149,6 +156,14 @@ final class BatteryViewModel: ObservableObject {
     
     func statusBarTitle() -> String {
         buildTitle()
+    }
+
+    var showsExactAdapterDeficit: Bool {
+        exactAdapterDeficit
+    }
+
+    var showsEstimatedAdapterDeficit: Bool {
+        estimatedAdapterDeficit
     }
     
     // MARK: - Refresh & ETA

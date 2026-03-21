@@ -1,6 +1,9 @@
 import Foundation
-import CoreBluetooth
+@preconcurrency import CoreBluetooth
 import IOBluetooth
+
+private let devicesBatteryServiceID = "180F"
+private let devicesBatteryLevelCharacteristicID = "2A19"
 
 struct DeviceBatteryInfo: Identifiable, Equatable {
     let id: String                 // stable key: BT addressString OR peripheral UUID string
@@ -17,10 +20,6 @@ final class DevicesBatteryViewModel: NSObject, ObservableObject {
     @Published private(set) var errorText: String?
     
     var connectedHeadphones: [DeviceBatteryInfo] { connectedDevices }
-    
-    // BLE Battery Service + Battery Level Characteristic
-    nonisolated static let batteryService = CBUUID(string: "180F")
-    nonisolated static let batteryLevelChar = CBUUID(string: "2A19")
     
     private var central: CBCentralManager!
     private var peripherals: [UUID: CBPeripheral] = [:]
@@ -80,7 +79,9 @@ final class DevicesBatteryViewModel: NSObject, ObservableObject {
             
             // 3) Fallback BLE battery service
             if central.state == .poweredOn {
-                let connected = central.retrieveConnectedPeripherals(withServices: [Self.batteryService])
+                let connected = central.retrieveConnectedPeripherals(
+                    withServices: [CBUUID(string: devicesBatteryServiceID)]
+                )
                 handleConnectedBLEPeripherals(connected)
             }
         }
@@ -277,7 +278,7 @@ final class DevicesBatteryViewModel: NSObject, ObservableObject {
             if p.state != .connected {
                 central.connect(p, options: nil)
             } else {
-                p.discoverServices([Self.batteryService])
+                p.discoverServices([CBUUID(string: devicesBatteryServiceID)])
             }
         }
     }
@@ -290,7 +291,9 @@ extension DevicesBatteryViewModel: CBCentralManagerDelegate {
         Task { @MainActor in
             if central.state == .poweredOn {
                 // Do a passive refresh (retrieve connected peripherals)
-                let connected = central.retrieveConnectedPeripherals(withServices: [Self.batteryService])
+                let connected = central.retrieveConnectedPeripherals(
+                    withServices: [CBUUID(string: devicesBatteryServiceID)]
+                )
                 handleConnectedBLEPeripherals(connected)
             }
         }
@@ -304,7 +307,7 @@ extension DevicesBatteryViewModel: CBCentralManagerDelegate {
     }
     
     nonisolated func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        peripheral.discoverServices([Self.batteryService])
+        peripheral.discoverServices([CBUUID(string: devicesBatteryServiceID)])
     }
     
     nonisolated func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -326,8 +329,11 @@ extension DevicesBatteryViewModel: CBPeripheralDelegate {
         guard error == nil else { return }
         guard let services = peripheral.services else { return }
         
-        for s in services where s.uuid == Self.batteryService {
-            peripheral.discoverCharacteristics([Self.batteryLevelChar], for: s)
+        let batteryService = CBUUID(string: devicesBatteryServiceID)
+        let batteryLevelChar = CBUUID(string: devicesBatteryLevelCharacteristicID)
+
+        for s in services where s.uuid == batteryService {
+            peripheral.discoverCharacteristics([batteryLevelChar], for: s)
         }
     }
     
@@ -338,8 +344,9 @@ extension DevicesBatteryViewModel: CBPeripheralDelegate {
         
         Task { @MainActor in
             guard let chars = service.characteristics else { return }
+            let batteryLevelChar = CBUUID(string: devicesBatteryLevelCharacteristicID)
             
-            for c in chars where c.uuid == Self.batteryLevelChar {
+            for c in chars where c.uuid == batteryLevelChar {
                 self.batteryChars[peripheral.identifier] = c
                 peripheral.readValue(for: c)
                 peripheral.setNotifyValue(true, for: c)
@@ -351,7 +358,8 @@ extension DevicesBatteryViewModel: CBPeripheralDelegate {
                                 didUpdateValueFor characteristic: CBCharacteristic,
                                 error: Error?) {
         guard error == nil else { return }
-        guard characteristic.uuid == Self.batteryLevelChar else { return }
+        let batteryLevelChar = CBUUID(string: devicesBatteryLevelCharacteristicID)
+        guard characteristic.uuid == batteryLevelChar else { return }
         guard let data = characteristic.value, data.count >= 1 else { return }
         
         let percent = Int(data.first!)

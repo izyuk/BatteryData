@@ -14,7 +14,7 @@ struct BatteryDataApp: App {
 
        init() {
            UserDefaults.standard.register(defaults: [
-               PrefKeys.refreshIntervalSec:      5.0,
+               PrefKeys.refreshIntervalSec:      1.0,
                PrefKeys.estimationWindowMin:     3.0,
                PrefKeys.showWattsInStatusBar:    true,
                PrefKeys.chartDurationMin:        60.0,

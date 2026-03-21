@@ -41,7 +41,7 @@ enum SystemProfilerBluetoothReader {
                 }
 
                 let outData = out.fileHandleForReading.readDataToEndOfFile()
-                let errData = err.fileHandleForReading.readDataToEndOfFile()
+                _ = err.fileHandleForReading.readDataToEndOfFile()
 
                 p.waitUntilExit()
 

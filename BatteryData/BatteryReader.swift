@@ -11,7 +11,7 @@ import IOKit.ps
 
 enum AdapterKind: String {
     case magsafe = "MagSafe"
-    case usbc    = "USB-C PD"
+    case usbc    = "Power Adapter"
     case unknown = "AC"
 }
 
@@ -215,28 +215,41 @@ private func readAdapterKindAndWatts() -> (AdapterKind?, Int?) {
             var props: Unmanaged<CFMutableDictionary>?
             if IORegistryEntryCreateCFProperties(service, &props, kCFAllocatorDefault, 0) == KERN_SUCCESS,
                let dict = props?.takeRetainedValue() as? [String: Any] {
-                if let bestIndex = dict["BestAdapterIndex"] as? Int,
-                   let controllers = dict["PortControllerInfo"] as? [[String: Any]],
-                   controllers.indices.contains(bestIndex),
-                   let maxPower = controllers[bestIndex]["PortControllerMaxPower"] as? Int,
-                   maxPower > 0 {
-                    watts = maxPower
+                let adapterDetails = (dict["AdapterDetails"] as? [String: Any]) ??
+                    ((dict["AppleRawAdapterDetails"] as? [[String: Any]])?.first)
+
+                if let rawWatts = adapterDetails?["Watts"] as? Int, rawWatts > 0 {
+                    watts = rawWatts
+                } else if let bestIndex = dict["BestAdapterIndex"] as? Int,
+                          let controllers = dict["PortControllerInfo"] as? [[String: Any]],
+                          controllers.indices.contains(bestIndex),
+                          let maxPower = controllers[bestIndex]["PortControllerMaxPower"] as? Int,
+                          maxPower > 0 {
+                    watts = normalizeAdapterPower(maxPower)
                 } else if let controllers = dict["PortControllerInfo"] as? [[String: Any]] {
                     watts = controllers
                         .compactMap { $0["PortControllerMaxPower"] as? Int }
                         .filter { $0 > 0 }
+                        .map(normalizeAdapterPower)
                         .max()
                 }
 
+                let adapterName = (adapterDetails?["Name"] as? String)?.lowercased()
+                let adapterDescription = (adapterDetails?["Description"] as? String)?.lowercased()
                 let conn = (dict["ChargingConnector"] as? String ??
                             dict["ChargerConnector"] as? String ??
                             (dict["ChargerData"] as? [String: Any])?["ChargingConnector"] as? String)?
                     .lowercased()
                 let typeCFlag = (dict["TypeCConnected"] as? Bool) ?? false
 
-                if typeCFlag || conn?.contains("type-c") == true || conn?.contains("usb-c") == true {
+                if typeCFlag ||
+                    conn?.contains("type-c") == true ||
+                    conn?.contains("usb-c") == true ||
+                    adapterName?.contains("usb-c") == true ||
+                    adapterDescription?.contains("pd charger") == true {
                     kind = .usbc
-                } else if conn?.contains("magsafe") == true {
+                } else if conn?.contains("magsafe") == true ||
+                            adapterName?.contains("magsafe") == true {
                     kind = .magsafe
                 }
             }
@@ -245,4 +258,11 @@ private func readAdapterKindAndWatts() -> (AdapterKind?, Int?) {
 
     if kind == nil { kind = .unknown }
     return (kind, watts)
+}
+
+private func normalizeAdapterPower(_ rawPower: Int) -> Int {
+    if rawPower >= 1_000 {
+        return Int((Double(rawPower) / 1_000.0).rounded())
+    }
+    return rawPower
 }

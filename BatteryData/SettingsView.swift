@@ -61,7 +61,8 @@ struct SettingsView: View {
                 HStack {
                     Text("Refresh interval")
                     Spacer()
-                    Text("\(Int(refresh)) s").monospacedDigit()
+                    let suffix = Int(refresh) == 1 ? " (Recommended)" : ""
+                    Text("\(Int(refresh)) s\(suffix)").monospacedDigit()
                 }
                 Slider(value: $refresh, in: 1...30, step: 1)
 

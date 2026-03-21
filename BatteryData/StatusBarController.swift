@@ -16,7 +16,6 @@ final class StatusBarController {
 
     private let vm: BatteryViewModel
     private var cancellables = Set<AnyCancellable>()
-    private var defaultsObserver: Any?
 
     init(vm: BatteryViewModel) {
         self.vm = vm
@@ -41,21 +40,14 @@ final class StatusBarController {
             .store(in: &cancellables)
 
         // оновлення title при зміні prefs (compact mode, watts, etc.)
-        defaultsObserver = NotificationCenter.default.addObserver(
-            forName: UserDefaults.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
                 self?.updateTitle()
             }
-        }
+            .store(in: &cancellables)
 
         updateTitle()
-    }
-
-    deinit {
-        if let obs = defaultsObserver { NotificationCenter.default.removeObserver(obs) }
     }
 
     @objc private func togglePopover(_ sender: Any?) {

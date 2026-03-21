@@ -71,11 +71,16 @@ struct MacBatteryMenuContentView: View {
 
             // Adapter (kind + rated watts)
             if vm.info.onACPower == true {
-                let kind = vm.info.adapterKind?.rawValue ?? "AC"
+                let kind: String = {
+                    if vm.info.adapterKind == .magsafe {
+                        return AdapterKind.magsafe.rawValue
+                    }
+                    return AdapterKind.usbc.rawValue
+                }()
                 if let w = vm.info.adapterWatts {
-                    Label("Adapter: \(kind) · \(w)W", systemImage: "powerplug")
+                    Label("\(kind) · \(w)W", systemImage: "powerplug")
                 } else {
-                    Label("Adapter: \(kind)", systemImage: "powerplug")
+                    Label(kind, systemImage: "powerplug")
                 }
             }
 
@@ -83,17 +88,27 @@ struct MacBatteryMenuContentView: View {
             Label("Battery power: \(wattsText(vm.info.watts))", systemImage: "bolt")
 
             // Adapter deficit warning
-            if vm.info.onACPower == true, let w = vm.info.watts, w < 0 {
+            if vm.showsExactAdapterDeficit, let w = vm.info.watts, w < 0 {
                 Label(String(format: "Adapter deficit: −%.1f W", abs(w)),
+                      systemImage: "exclamationmark.triangle")
+                    .foregroundStyle(.orange)
+            } else if vm.showsEstimatedAdapterDeficit {
+                Label("Adapter deficit: estimating…",
                       systemImage: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
             }
 
             // ETA (prefer discharge ETA on deficit)
-            if vm.info.onACPower == true, let w = vm.info.watts, w < 0,
+            if vm.showsExactAdapterDeficit,
+               let w = vm.info.watts, w < 0,
                let t = vm.info.timeToEmptyMin, t > 0 {
                 let approx = vm.usedFallbackEstimate ? "≈ " : ""
                 Label("Time to empty: \(approx)\(BatteryInfo.format(mins: t))",
+                      systemImage: "clock.badge.exclamationmark")
+                    .foregroundStyle(.secondary)
+            } else if vm.showsEstimatedAdapterDeficit,
+                      let t = vm.info.timeToEmptyMin, t > 0 {
+                Label("Time to empty: ≈ \(BatteryInfo.format(mins: t))",
                       systemImage: "clock.badge.exclamationmark")
                     .foregroundStyle(.secondary)
             } else if vm.info.isCharging == true,
@@ -165,6 +180,7 @@ struct MacBatteryMenuContentView: View {
 
 // MARK: - Settings window fallback
 
+@MainActor
 final class SettingsWindowPresenter {
     static let shared = SettingsWindowPresenter()
     private var window: NSWindow?
