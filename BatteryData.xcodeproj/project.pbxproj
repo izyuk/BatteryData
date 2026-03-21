@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		7A1B2C3D4E5F60718293A401 /* BatteryDataWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 7A1B2C3D4E5F60718293A400 /* BatteryDataWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		1E1AD5002E73250E00F2C143 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +25,34 @@
 			remoteGlobalIDString = 1E1AD4F02E73250C00F2C143;
 			remoteInfo = BateryData;
 		};
+		7A1B2C3D4E5F60718293A402 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E1AD4E92E73250C00F2C143 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7A1B2C3D4E5F60718293A403;
+			remoteInfo = BatteryDataWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7A1B2C3D4E5F60718293A405 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				7A1B2C3D4E5F60718293A401 /* BatteryDataWidgetExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1E1AD4F12E73250C00F2C143 /* BatteryData.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BatteryData.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E1AD4FF2E73250E00F2C143 /* BateryDataTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BateryDataTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E1AD5092E73250E00F2C143 /* BateryDataUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BateryDataUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A1B2C3D4E5F60718293A400 /* BatteryDataWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BatteryDataWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +69,11 @@
 		1E1AD50C2E73250E00F2C143 /* BatteryDataUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = BatteryDataUITests;
+			sourceTree = "<group>";
+		};
+		7A1B2C3D4E5F60718293A404 /* BatteryDataWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BatteryDataWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -69,6 +100,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7A1B2C3D4E5F60718293A406 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -78,6 +116,7 @@
 				1E1AD4F32E73250C00F2C143 /* BatteryData */,
 				1E1AD5022E73250E00F2C143 /* BatteryDataTests */,
 				1E1AD50C2E73250E00F2C143 /* BatteryDataUITests */,
+				7A1B2C3D4E5F60718293A404 /* BatteryDataWidget */,
 				1E1AD4F22E73250C00F2C143 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,6 +127,7 @@
 				1E1AD4F12E73250C00F2C143 /* BatteryData.app */,
 				1E1AD4FF2E73250E00F2C143 /* BateryDataTests.xctest */,
 				1E1AD5092E73250E00F2C143 /* BateryDataUITests.xctest */,
+				7A1B2C3D4E5F60718293A400 /* BatteryDataWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -102,10 +142,12 @@
 				1E1AD4ED2E73250C00F2C143 /* Sources */,
 				1E1AD4EE2E73250C00F2C143 /* Frameworks */,
 				1E1AD4EF2E73250C00F2C143 /* Resources */,
+				7A1B2C3D4E5F60718293A405 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				7A1B2C3D4E5F60718293A40A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				1E1AD4F32E73250C00F2C143 /* BatteryData */,
@@ -163,6 +205,28 @@
 			productReference = 1E1AD5092E73250E00F2C143 /* BateryDataUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		7A1B2C3D4E5F60718293A403 /* BatteryDataWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7A1B2C3D4E5F60718293A40F /* Build configuration list for PBXNativeTarget "BatteryDataWidgetExtension" */;
+			buildPhases = (
+				7A1B2C3D4E5F60718293A407 /* Sources */,
+				7A1B2C3D4E5F60718293A406 /* Frameworks */,
+				7A1B2C3D4E5F60718293A408 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				7A1B2C3D4E5F60718293A404 /* BatteryDataWidget */,
+			);
+			name = BatteryDataWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = BatteryDataWidgetExtension;
+			productReference = 7A1B2C3D4E5F60718293A400 /* BatteryDataWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -185,6 +249,9 @@
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = 1E1AD4F02E73250C00F2C143;
 					};
+					7A1B2C3D4E5F60718293A403 = {
+						CreatedOnToolsVersion = 16.4;
+					};
 				};
 			};
 			buildConfigurationList = 1E1AD4EC2E73250C00F2C143 /* Build configuration list for PBXProject "BatteryData" */;
@@ -204,6 +271,7 @@
 				1E1AD4F02E73250C00F2C143 /* BatteryData */,
 				1E1AD4FE2E73250E00F2C143 /* BateryDataTests */,
 				1E1AD5082E73250E00F2C143 /* BateryDataUITests */,
+				7A1B2C3D4E5F60718293A403 /* BatteryDataWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -224,6 +292,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		1E1AD5072E73250E00F2C143 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7A1B2C3D4E5F60718293A408 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -254,6 +329,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7A1B2C3D4E5F60718293A407 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -266,6 +348,11 @@
 			isa = PBXTargetDependency;
 			target = 1E1AD4F02E73250C00F2C143 /* BatteryData */;
 			targetProxy = 1E1AD50A2E73250E00F2C143 /* PBXContainerItemProxy */;
+		};
+		7A1B2C3D4E5F60718293A40A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7A1B2C3D4E5F60718293A403 /* BatteryDataWidgetExtension */;
+			targetProxy = 7A1B2C3D4E5F60718293A402 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -531,6 +618,56 @@
 			};
 			name = Release;
 		};
+		7A1B2C3D4E5F60718293A40B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = BatteryDataWidget/BatteryDataWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2BLSUFKZ5R;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "BatteryDataWidget-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../Frameworks",
+					"@executable_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.DmytroIziuk.BatteryData.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		7A1B2C3D4E5F60718293A40C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = BatteryDataWidget/BatteryDataWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2BLSUFKZ5R;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "BatteryDataWidget-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../../Frameworks",
+					"@executable_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.DmytroIziuk.BatteryData.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -566,6 +703,15 @@
 			buildConfigurations = (
 				1E1AD51A2E73250E00F2C143 /* Debug */,
 				1E1AD51B2E73250E00F2C143 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7A1B2C3D4E5F60718293A40F /* Build configuration list for PBXNativeTarget "BatteryDataWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7A1B2C3D4E5F60718293A40B /* Debug */,
+				7A1B2C3D4E5F60718293A40C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

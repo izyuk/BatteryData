@@ -208,11 +208,6 @@ private func readAdapterKindAndWatts() -> (AdapterKind?, Int?) {
     var kind: AdapterKind? = nil
     var watts: Int? = nil
 
-    if let det = IOPSCopyExternalPowerAdapterDetails()?.takeRetainedValue() as? [String: Any] {
-        if let w = det[kIOPSPowerAdapterWattsKey as String] as? Int { watts = w }
-        else if let w = det[kIOPSPowerAdapterWattsKey as String] as? Double { watts = Int(w.rounded()) }
-    }
-
     if let matching = IOServiceMatching("AppleSmartBattery") {
         let service = IOServiceGetMatchingService(kIOMainPortDefault, matching)
         if service != IO_OBJECT_NULL {
@@ -220,6 +215,19 @@ private func readAdapterKindAndWatts() -> (AdapterKind?, Int?) {
             var props: Unmanaged<CFMutableDictionary>?
             if IORegistryEntryCreateCFProperties(service, &props, kCFAllocatorDefault, 0) == KERN_SUCCESS,
                let dict = props?.takeRetainedValue() as? [String: Any] {
+                if let bestIndex = dict["BestAdapterIndex"] as? Int,
+                   let controllers = dict["PortControllerInfo"] as? [[String: Any]],
+                   controllers.indices.contains(bestIndex),
+                   let maxPower = controllers[bestIndex]["PortControllerMaxPower"] as? Int,
+                   maxPower > 0 {
+                    watts = maxPower
+                } else if let controllers = dict["PortControllerInfo"] as? [[String: Any]] {
+                    watts = controllers
+                        .compactMap { $0["PortControllerMaxPower"] as? Int }
+                        .filter { $0 > 0 }
+                        .max()
+                }
+
                 let conn = (dict["ChargingConnector"] as? String ??
                             dict["ChargerConnector"] as? String ??
                             (dict["ChargerData"] as? [String: Any])?["ChargingConnector"] as? String)?

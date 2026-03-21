@@ -7,6 +7,9 @@
 
 import Foundation
 import Combine
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 final class BatteryViewModel: ObservableObject {
     @Published private(set) var info = BatteryInfo.empty
@@ -21,6 +24,8 @@ final class BatteryViewModel: ObservableObject {
     private var fullChargeStart: Date?
     private var fullNotified = false
     private var lastSpikeAt: Date?
+    private var lastWidgetReloadAt: Date?
+    private var lastWidgetReloadSignature: WidgetReloadSignature?
     
     // Prefs
     private var refreshIntervalSec: TimeInterval { UserDefaults.standard.double(forKey: PrefKeys.refreshIntervalSec) }
@@ -149,6 +154,9 @@ final class BatteryViewModel: ObservableObject {
     // MARK: - Refresh & ETA
     
     func refresh() {
+        let previousInfo = info
+        let previousFallback = usedFallbackEstimate
+        let currentTime = now()
         usedFallbackEstimate = false
         let newInfo = readBatteryInfo() ?? .empty
         info = newInfo
@@ -156,7 +164,6 @@ final class BatteryViewModel: ObservableObject {
         appendHistory(info: newInfo)
         
         if let p = newInfo.percentage {
-            let currentTime = now()
             samplesForEta.append((currentTime, p))
             let cutoff = currentTime.addingTimeInterval(-estimationWindowSec)
             samplesForEta.removeAll { $0.t < cutoff }
@@ -193,7 +200,9 @@ final class BatteryViewModel: ObservableObject {
             }
         }
         
+        WidgetSnapshotStore.save(info: info, updatedAt: currentTime)
         handleNotifications(old: newInfo)
+        reloadWidgetIfNeeded(previousInfo: previousInfo, previousFallback: previousFallback)
     }
     
     private func estimateMinutesLeftFromSamples(windowSec: TimeInterval) -> Int? {
@@ -258,5 +267,43 @@ final class BatteryViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    private struct WidgetReloadSignature: Equatable {
+        let percentage: Int?
+        let isCharging: Bool?
+        let onACPower: Bool?
+        let timeToEmptyMin: Int?
+        let timeToFullMin: Int?
+        let wattsRounded: Int?
+        let usedFallbackEstimate: Bool
+
+        init(info: BatteryInfo, usedFallbackEstimate: Bool) {
+            self.percentage = info.percentage
+            self.isCharging = info.isCharging
+            self.onACPower = info.onACPower
+            self.timeToEmptyMin = info.timeToEmptyMin
+            self.timeToFullMin = info.timeToFullMin
+            self.wattsRounded = info.watts.map { Int($0.rounded()) }
+            self.usedFallbackEstimate = usedFallbackEstimate
+        }
+    }
+
+    private func reloadWidgetIfNeeded(previousInfo: BatteryInfo, previousFallback: Bool) {
+        #if canImport(WidgetKit)
+        let oldSignature = WidgetReloadSignature(info: previousInfo, usedFallbackEstimate: previousFallback)
+        let newSignature = WidgetReloadSignature(info: info, usedFallbackEstimate: usedFallbackEstimate)
+
+        let changed = oldSignature != newSignature
+        let neverReloaded = lastWidgetReloadSignature == nil
+        let currentTime = now()
+        let enoughTimePassed = lastWidgetReloadAt.map { currentTime.timeIntervalSince($0) >= 30 } ?? true
+
+        guard (changed || neverReloaded), enoughTimePassed else { return }
+
+        WidgetCenter.shared.reloadTimelines(ofKind: "BatteryDataWidget")
+        lastWidgetReloadAt = currentTime
+        lastWidgetReloadSignature = newSignature
+        #endif
     }
 }

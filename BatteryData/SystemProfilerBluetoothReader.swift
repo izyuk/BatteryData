@@ -36,7 +36,6 @@ enum SystemProfilerBluetoothReader {
                 do {
                     try p.run()
                 } catch {
-                    print("system_profiler run error:", error)
                     cont.resume(returning: nil)
                     return
                 }
